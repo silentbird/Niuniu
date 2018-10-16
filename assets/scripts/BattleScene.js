@@ -13,6 +13,9 @@ var BattleScene = cc.Class({
         bossCard: [cc.Sprite],
         Suit: [cc.SpriteFrame],
         mainPic: [cc.SpriteFrame],
+        bossResult: cc.Sprite,
+        playerResult: cc.Sprite,
+        Result: cc.Sprite,
     },
 
     backToLogin: function () {
@@ -158,13 +161,66 @@ var BattleScene = cc.Class({
             this.playerCard[i].node.runAction(cc.moveBy(timeframe * i, cc.v2(distance * i, 0)));
         }
         for (let i = 0; i < 5; i++) {
+            if (i == 4) {
+                this.bossCard[i].node.runAction(
+                    cc.sequence(cc.moveBy(timeframe * i, cc.v2(distance * i, 0)),
+                        cc.delayTime(0.5),
+                        cc.callFunc(this.compareCard, this)));
+                return;
+            }
             this.bossCard[i].node.runAction(cc.moveBy(timeframe * i, cc.v2(distance * i, 0)));
         }
     },
 
-    resetGame() {
+    resetGame: function () {
         cc.director.loadScene('BattleScene');
-    }
+    },
+
+    compareCard: function () {
+        // for (let i = 0; i < 2; i++) {
+        //     if (i == 0) {
+        //         var result = this.bossResult;
+        //     }
+        //     else {
+        //         var result = this.playerResult;
+        //     }
+        //     result.node.active = true;
+        //     result.node.scale = 0;
+        //     result.node.runAction(cc.sequence(cc.scaleTo(0.2, 1.5), cc.scaleTo(0.1, 1)));
+        // }
+
+        // var self = this;
+        // cc.loader.loadRes("niu" + g_player[1].Type, cc.SpriteFrame, function (err, spriteFrame) {
+        //     if (err) {
+        //         cc.log('error');
+        //         return;
+        //     }
+        //     self.playerResult.node.getComponent(cc.Sprite).spriteFrame = spriteFrame;
+        // });
+        // cc.loader.loadRes("niu" + g_player[0].Type, cc.SpriteFrame, function (err, spriteFrame) {
+        //     if (err) {
+        //         cc.log('error');
+        //         return;
+        //     }
+        //     self.bossResult.node.getComponent(cc.Sprite).spriteFrame = spriteFrame;
+        // });
+        var result = [cc.Sprite];
+        for (let i = 0; i < 2; i++) {
+            if (i == 0) {
+                result[i] = this.bossResult;
+            }
+            else {
+                result[i] = this.playerResult;
+            }
+            cc.loader.loadRes("niu" + g_player[i].Type, cc.SpriteFrame, function (err, spriteFrame) {
+                result[i].node.getComponent(cc.Sprite).spriteFrame = spriteFrame;
+            });
+
+            result[i].node.active = true;
+            result[i].node.scale = 0;
+            result[i].node.runAction(cc.sequence(cc.scaleTo(0.2, 1.5), cc.scaleTo(0.1, 1)));
+        }
+    },
 });
 
 
