@@ -1,13 +1,15 @@
 var g_playerNum = 2;//玩家数量
 var g_player = [];//玩家
 var A2_10JQK = 'NAN,A,2,3,4,5,6,7,8,9,10,J,Q,K'.split(',');
+var firstEnter = true;
 
 var BattleScene = cc.Class({
     extends: cc.Component,
 
     properties: {
+        registerLayer: cc.Node,
+        btnResetGame: cc.Button,
         editbox: cc.EditBox,
-        btnStart: cc.Button,
         playLayer: cc.Node,
         playerCard: [cc.Sprite],
         bossCard: [cc.Sprite],
@@ -15,7 +17,19 @@ var BattleScene = cc.Class({
         mainPic: [cc.SpriteFrame],
         bossResult: cc.Sprite,
         playerResult: cc.Sprite,
-        Result: cc.Sprite,
+        ResultText: cc.Label,
+    },
+
+    onLoad: function () {
+        if (firstEnter == true) {
+            this.registerLayer.active = true;
+            this.playLayer.active = false;
+        }
+        else {
+            this.registerLayer.active = false;
+            this.playLayer.active = true;
+            this.startGame();
+        }
     },
 
     backToLogin: function () {
@@ -24,8 +38,7 @@ var BattleScene = cc.Class({
 
     startGame: function () {
         var playername = this.editbox.string;
-        this.editbox.node.runAction(cc.removeSelf());
-        this.btnStart.node.runAction(cc.removeSelf());
+        this.registerLayer.active = false;
         this.playLayer.active = true;
         this.initCard();
         this.pushCard();
@@ -165,7 +178,9 @@ var BattleScene = cc.Class({
                 this.bossCard[i].node.runAction(
                     cc.sequence(cc.moveBy(timeframe * i, cc.v2(distance * i, 0)),
                         cc.delayTime(0.5),
-                        cc.callFunc(this.compareCard, this)));
+                        cc.callFunc(this.compareCard, this),
+                        cc.delayTime(0.5),
+                        cc.callFunc(this.result, this)));
                 return;
             }
             this.bossCard[i].node.runAction(cc.moveBy(timeframe * i, cc.v2(distance * i, 0)));
@@ -174,36 +189,10 @@ var BattleScene = cc.Class({
 
     resetGame: function () {
         cc.director.loadScene('BattleScene');
+        firstEnter = false;
     },
 
     compareCard: function () {
-        // for (let i = 0; i < 2; i++) {
-        //     if (i == 0) {
-        //         var result = this.bossResult;
-        //     }
-        //     else {
-        //         var result = this.playerResult;
-        //     }
-        //     result.node.active = true;
-        //     result.node.scale = 0;
-        //     result.node.runAction(cc.sequence(cc.scaleTo(0.2, 1.5), cc.scaleTo(0.1, 1)));
-        // }
-
-        // var self = this;
-        // cc.loader.loadRes("niu" + g_player[1].Type, cc.SpriteFrame, function (err, spriteFrame) {
-        //     if (err) {
-        //         cc.log('error');
-        //         return;
-        //     }
-        //     self.playerResult.node.getComponent(cc.Sprite).spriteFrame = spriteFrame;
-        // });
-        // cc.loader.loadRes("niu" + g_player[0].Type, cc.SpriteFrame, function (err, spriteFrame) {
-        //     if (err) {
-        //         cc.log('error');
-        //         return;
-        //     }
-        //     self.bossResult.node.getComponent(cc.Sprite).spriteFrame = spriteFrame;
-        // });
         var result = [cc.Sprite];
         for (let i = 0; i < 2; i++) {
             if (i == 0) {
@@ -215,14 +204,28 @@ var BattleScene = cc.Class({
             cc.loader.loadRes("niu" + g_player[i].Type, cc.SpriteFrame, function (err, spriteFrame) {
                 result[i].node.getComponent(cc.Sprite).spriteFrame = spriteFrame;
             });
-
             result[i].node.active = true;
             result[i].node.scale = 0;
             result[i].node.runAction(cc.sequence(cc.scaleTo(0.2, 1.5), cc.scaleTo(0.1, 1)));
         }
     },
-});
 
+    result: function () {
+        this.ResultText.node.active = true;
+        if (g_player[0].Type > g_player[1].Type) {
+            this.ResultText.string = '你输了！';
+        }
+        else if (g_player[0].Type < g_player[1].Type) {
+            this.ResultText.string = '你赢了！';
+        }
+        else {
+            this.ResultText.string = '平局！';
+        }
+        this.btnResetGame.node.active = true;
+        this.btnResetGame.scale = 0;
+        this.btnResetGame.node.runAction(cc.scaleTo(1, 1));
+    }
+});
 
 function randNum(min, max) {
     //获得一个min到max-1的随机数
