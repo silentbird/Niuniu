@@ -1,0 +1,76 @@
+52，13*4
+两个以上，5张
+选三张、凑10的倍数，凑不成就没牛
+
+var g_PlayerNum = 2;
+var g_arPlayer = [];
+var g_arCard = [];
+
+function InitBattle()
+{
+	var arCard = [];
+	for (52)
+	{
+	}
+	arCard = []; 1~52
+
+	for (g_PlayerNum)
+	{
+		for (5)
+		{
+			g_arPlayer[i][]= _getSendCard(arCard);
+		}
+	}
+}
+
+function _getSendCard(arCard)
+{
+	var card = arCard[rand() % ]
+	for ()
+	{
+	}
+	return card;
+}
+
+g_arPlayer[0] = [39, 40, 1, 20, 26];//13 1 1 7 13 
+g_arPlayer[1] = [20, 25, 15, 33, 46];//7 12 2 10 7
+
+var arResult[] = {};
+/* {
+	arr: {, , , , , },
+}	
+*/
+function _getCardResult(player, result)
+{
+	
+}
+
+for (var i = 0; i < 5; i++)
+{
+	for (var j = i + 1; j < 5; j++)
+	{
+		for (var k = j + 1; k < 5; k++)
+		{
+			if ( + +  % 10 = 0)
+			{
+				return ;
+			}
+		}
+	}
+	return {};
+}
+
+牛牛
+
+
+
+g_player[I]={
+	name='庄家',
+	card=[],
+	type='111',
+
+}
+
+
+
+

@@ -18,6 +18,7 @@ var BattleScene = cc.Class({
         bossResult: cc.Sprite,
         playerResult: cc.Sprite,
         ResultText: cc.Label,
+        playerInfo: cc.Node,
     },
 
     onLoad: function () {
@@ -33,6 +34,7 @@ var BattleScene = cc.Class({
     },
 
     backToLogin: function () {
+        firstEnter = true;
         cc.director.loadScene('LoginScene');
     },
 
@@ -40,6 +42,9 @@ var BattleScene = cc.Class({
         var playername = this.editbox.string;
         this.registerLayer.active = false;
         this.playLayer.active = true;
+        this.playerInfo.active = true;
+        this.playerInfo.getChildByName("playerName").getComponent(cc.Label).string = playername;
+        this.playerInfo.getChildByName("playerMoney").getComponent(cc.Label).string = '$5000';
         this.initCard();
         this.pushCard();
         //cc.log('playername=', playername);
@@ -58,6 +63,7 @@ var BattleScene = cc.Class({
             g_player[i] = {
                 Type: 0,
                 Card: [],
+                Beishu: 1,
             };
             for (let j = 0; j < 5; j++) {
                 g_player[i].Card[j] = {
@@ -152,17 +158,64 @@ var BattleScene = cc.Class({
             for (let i = 0; i < 5; i++) {
                 for (let j = i + 1; j < 5; j++) {
                     for (let k = j + 1; k < 5; k++) {
-                        if ((g_player[playeridx].Card[i].inumber + g_player[playeridx].Card[j].inumber
-                            + g_player[playeridx].Card[k].inumber) % 10 == 0) {
-                            if ((g_player[playeridx].Card[TwoFromFive(i, j, k)[0]].inumber
-                                + g_player[playeridx].Card[TwoFromFive(i, j, k)[1]].inumber) % 10 == 0) {
-                                g_player[playeridx].Type = 10;
+                        var number = [];
+                        number[0] = g_player[playeridx].Card[i].inumber;
+                        number[1] = g_player[playeridx].Card[j].inumber;
+                        number[2] = g_player[playeridx].Card[k].inumber;
+                        number[3] = g_player[playeridx].Card[TwoFromFive(i, j, k)[0]].inumber;
+                        number[4] = g_player[playeridx].Card[TwoFromFive(i, j, k)[1]].inumber;
+                        //有牛牛的情况
+                        if ((number[0] + number[1] + number[2]) % 10 == 0) {
+                            g_player[playeridx].Type = (number[3] + number[4]) % 10;
+                            if (g_player[playeridx].Type >= 7) {
+                                g_player[playeridx].Beishu = 2;
                             }
-                            g_player[playeridx].Type = (g_player[playeridx].Card[TwoFromFive(i, j, k)[0]].inumber
-                                + g_player[playeridx].Card[TwoFromFive(i, j, k)[1]].inumber) % 10;
+                            //牛牛的情况
+                            if ((number[3] + number[4]) % 10 == 0) {
+                                g_player[playeridx].Type = 10;
+                                g_player[playeridx].Beishu = 3;
+                            }
                         }
                     }
                 }
+            }
+            //四炸
+            for (let a = 0; a < 5; a++) {
+                for (let b = a + 1; b < 5; b++) {
+                    for (let c = b + 1; c < 5; c++) {
+                        for (let d = c + 1; d < 5; d++) {
+                            if (g_player[playeridx].Card[a].number == g_player[playeridx].Card[b].number
+                                && g_player[playeridx].Card[a].number == g_player[playeridx].Card[c].number
+                                && g_player[playeridx].Card[a].number == g_player[playeridx].Card[d].number) {
+                                g_player[playeridx].Type = 11;
+                                g_player[playeridx].Beishu = 4;
+                            }
+                            for (let e = d + 1; e < 5; e++) {
+                                //五花牛的情况
+                                if (g_player[playeridx].Card[a].number > 10
+                                    && g_player[playeridx].Card[b].number > 10
+                                    && g_player[playeridx].Card[c].number > 10
+                                    && g_player[playeridx].Card[d].number > 10
+                                    && g_player[playeridx].Card[e].number > 10) {
+                                    g_player[playeridx].Type = 12;
+                                    g_player[playeridx].Beishu = 5;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            //五小牛判断
+            if (g_player[playeridx].Card[0].number < 6
+                && g_player[playeridx].Card[1].number < 6
+                && g_player[playeridx].Card[2].number < 6
+                && g_player[playeridx].Card[3].number < 6
+                && g_player[playeridx].Card[4].number < 6
+                && g_player[playeridx].Card[0].number + g_player[playeridx].Card[1].number
+                + g_player[playeridx].Card[2].number + g_player[playeridx].Card[3].number
+                + g_player[playeridx].Card[4].number <= 10) {
+                g_player[playeridx].Type = 13;
+                g_player[playeridx].Beishu = 8;
             }
         }
     },
@@ -214,12 +267,14 @@ var BattleScene = cc.Class({
         this.ResultText.node.active = true;
         if (g_player[0].Type > g_player[1].Type) {
             this.ResultText.string = '你输了！';
+            g_player[1].Beishu = -g_player[1].Beishu;
         }
         else if (g_player[0].Type < g_player[1].Type) {
             this.ResultText.string = '你赢了！';
         }
         else {
             this.ResultText.string = '平局！';
+            g_player[1].Beishu = 0;
         }
         this.btnResetGame.node.active = true;
         this.btnResetGame.scale = 0;
